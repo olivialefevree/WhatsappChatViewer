@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhatsApp Chat Viewer — Local</title>
+  <title>WhatsApp Chat Viewer — Local (ZIP-enabled)</title>
   <style>
     :root {
       --bg: #0b141a;
@@ -35,9 +35,7 @@
       color-scheme: light;
     }
 
-    html, body {
-      height: 100%;
-    }
+    html, body { height: 100%; }
     body {
       margin: 0;
       font: 15px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
@@ -45,201 +43,65 @@
       color: var(--text);
     }
 
-    /* Top bar */
     .topbar {
-      position: sticky;
-      top: 0;
-      display: grid;
-      grid-template-columns: 1fr auto auto auto auto;
-      gap: .5rem;
-      align-items: center;
-      background: var(--panel);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      padding: .5rem .75rem;
-      z-index: 50;
+      position: sticky; top: 0; display: grid;
+      grid-template-columns: 1fr auto auto auto auto; gap: .5rem; align-items: center;
+      background: var(--panel); border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: .5rem .75rem; z-index: 50;
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      font-weight: 700;
-      letter-spacing: .3px;
-    }
-    .brand .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: inline-block;
-      box-shadow: 0 0 0 3px rgba(2,168,132,.2);
-    }
+    .brand { display: flex; align-items: center; gap: .5rem; font-weight: 700; letter-spacing: .3px; }
+    .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); display: inline-block; box-shadow: 0 0 0 3px rgba(2,168,132,.2); }
 
-    .controls {
-      display: flex; gap: .5rem; align-items: center;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    .btn {
-      appearance: none;
-      border: 1px solid rgba(255,255,255,.1);
-      background: var(--panel-2);
-      color: var(--text);
-      padding: .5rem .7rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-    }
+    .controls { display: flex; gap: .5rem; align-items: center; }
+    input[type="file"] { display: none; }
+    .btn { appearance: none; border: 1px solid rgba(255,255,255,.1); background: var(--panel-2); color: var(--text); padding: .55rem .8rem; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); touch-action: manipulation; }
     .btn:hover { filter: brightness(1.05); }
     .btn:active { transform: translateY(1px); }
 
-    .pill {
-      background: var(--panel-2);
-      border: 1px solid rgba(255,255,255,.08);
-      padding: .3rem .5rem;
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 12px;
-    }
+    .pill { background: var(--panel-2); border: 1px solid rgba(255,255,255,.08); padding: .3rem .5rem; border-radius: 999px; color: var(--muted); font-size: 12px; }
 
-    .search-wrap {
-      display: flex; gap: .5rem; align-items: center;
-      padding: .35rem .5rem;
-      border-radius: 10px;
-      background: var(--panel-2);
-      border: 1px solid rgba(255,255,255,.08);
-      min-width: 200px;
-    }
-    .search-wrap input[type="search"] {
-      background: transparent; border: 0; outline: 0; color: var(--text);
-      width: 220px;
-    }
+    .search-wrap { display: flex; gap: .5rem; align-items: center; padding: .35rem .5rem; border-radius: 10px; background: var(--panel-2); border: 1px solid rgba(255,255,255,.08); min-width: 200px; }
+    .search-wrap input[type="search"] { background: transparent; border: 0; outline: 0; color: var(--text); width: 220px; }
     .search-count { font-size: 12px; color: var(--muted); }
+    .select { background: var(--panel-2); border: 1px solid rgba(255,255,255,.08); color: var(--text); border-radius: 10px; padding: .45rem .5rem; }
 
-    .select {
-      background: var(--panel-2); border: 1px solid rgba(255,255,255,.08);
-      color: var(--text);
-      border-radius: 10px; padding: .45rem .5rem;
-    }
+    .wrap { max-width: clamp(640px, 92vw, 960px); margin: 0 auto; padding: .5rem; }
+    .chat { display: flex; flex-direction: column; gap: .35rem; padding: .75rem .5rem 4rem; }
 
-    /* Content area */
-    .wrap {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: .5rem;
-    }
-    .chat {
-      display: flex; flex-direction: column; gap: .35rem;
-      padding: .75rem .5rem 4rem;
-    }
+    .date-chip { align-self: center; background: var(--datechip); padding: .35rem .75rem; border-radius: 999px; color: var(--muted); font-size: 12px; margin: .5rem 0; border: 1px solid rgba(255,255,255,.08); }
 
-    .date-chip {
-      align-self: center;
-      background: var(--datechip);
-      padding: .35rem .75rem;
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 12px;
-      margin: .5rem 0;
-      border: 1px solid rgba(255,255,255,.08);
-    }
-
-    .row {
-      display: flex;
-      gap: .5rem; align-items: flex-end;
-    }
-
+    .row { display: flex; gap: .5rem; align-items: flex-end; }
     .row.mine { justify-content: flex-end; }
-    .row .avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #2a3942; color: #cfd6da;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; flex: 0 0 28px;
-      user-select: none;
-    }
+    .row .avatar { width: 28px; height: 28px; border-radius: 50%; background: #2a3942; color: #cfd6da; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex: 0 0 28px; user-select: none; }
     .row.mine .avatar { display: none; }
 
-    .bubble {
-      max-width: min(80%, 660px);
-      background: var(--them);
-      border-radius: 12px var(--bubble-radius) var(--bubble-radius) 12px;
-      padding: .55rem .65rem .35rem .65rem;
-      position: relative;
-      box-shadow: var(--shadow);
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    .row.mine .bubble {
-      background: var(--me);
-      border-radius: var(--bubble-radius) 12px 12px var(--bubble-radius);
-    }
+    .bubble { max-width: min(82vw, 660px); background: var(--them); border-radius: 12px var(--bubble-radius) var(--bubble-radius) 12px; padding: .55rem .65rem .35rem .65rem; position: relative; box-shadow: var(--shadow); white-space: pre-wrap; word-wrap: break-word; }
+    .row.mine .bubble { background: var(--me); border-radius: var(--bubble-radius) 12px 12px var(--bubble-radius); }
 
-    .meta {
-      display: flex; gap: .5rem; align-items: baseline; margin-bottom: .2rem;
-      color: var(--muted); font-size: 12px; font-weight: 600;
-    }
+    .meta { display: flex; gap: .5rem; align-items: baseline; margin-bottom: .2rem; color: var(--muted); font-size: 12px; font-weight: 600; }
     .sender { color: var(--muted); }
     .time { margin-left: auto; font-variant-numeric: tabular-nums; }
-    .edited {
-      display: inline-block; margin-left: .35rem; font-size: 11px; color: var(--muted);
-      background: rgba(255,255,255,.06);
-      padding: 2px 6px; border-radius: 999px;
-    }
+    .edited { display: inline-block; margin-left: .35rem; font-size: 11px; color: var(--muted); background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 999px; }
 
-    .system {
-      align-self: center;
-      color: var(--muted);
-      background: transparent;
-      border: 0;
-      box-shadow: none;
-      font-size: 13px;
-    }
+    .system { align-self: center; color: var(--muted); background: transparent; border: 0; box-shadow: none; font-size: 13px; }
 
     .content a { color: var(--accent); text-decoration: none; }
     .content a:hover { text-decoration: underline; }
 
-    .attachments {
-      display: grid; gap: .35rem; margin-top: .35rem;
-    }
-    .att {
-      overflow: hidden; border-radius: 10px; border: 1px solid rgba(255,255,255,.08);
-      background: #0b0f12;
-    }
-    .att img, .att video {
-      display: block; width: 100%;
-      height: auto; max-height: 360px; object-fit: cover;
-    }
-    .att .missing {
-      padding: .7rem;
-      color: var(--muted);
-      background: rgba(0,0,0,.2);
-      font-size: 13px;
-    }
+    .attachments { display: grid; gap: .35rem; margin-top: .35rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .att { overflow: hidden; border-radius: 10px; border: 1px solid rgba(255,255,255,.08); background: #0b0f12; }
+    .att img, .att video { display: block; width: 100%; height: auto; max-height: 45vh; object-fit: cover; }
+    .att .missing { padding: .7rem; color: var(--muted); background: rgba(0,0,0,.2); font-size: 13px; }
 
-    .toolbar {
-      position: fixed; right: 12px; bottom: 12px; z-index: 60;
-      display: flex; flex-direction: column; gap: .5rem;
-    }
-    .fab {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--accent); border: 0; color: white;
-      font-weight: 900; cursor: pointer; box-shadow: var(--shadow);
-    }
+    .toolbar { position: fixed; right: 12px; bottom: 12px; z-index: 60; display: flex; flex-direction: column; gap: .5rem; }
+    .fab { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: 0; color: white; font-weight: 900; cursor: pointer; box-shadow: var(--shadow); }
 
-    .hint {
-      color: var(--muted);
-      font-size: 12px;
-      padding: .5rem 1rem;
-      background: rgba(255,255,255,.04);
-      border: 1px dashed rgba(255,255,255,.1);
-      border-radius: 10px;
-      margin-top: .5rem;
-    }
+    .hint { color: var(--muted); font-size: 12px; padding: .5rem 1rem; background: rgba(255,255,255,.04); border: 1px dashed rgba(255,255,255,.1); border-radius: 10px; margin-top: .5rem; }
 
     .highlight { background: rgba(2,168,132,.25); padding: 0 2px; border-radius: 2px; }
 
-    @media (max-width: 700px) {
-      .topbar { grid-template-columns: 1fr auto auto; grid-auto-rows: auto; grid-auto-flow: row; }
+    @media (max-width: 700px) { .topbar { grid-template-columns: 1fr auto; grid-auto-rows: auto; grid-auto-flow: row; } .controls { flex-wrap: wrap; gap: .4rem; } .search-wrap input[type="search"] { width: 140px; } .bubble { max-width: min(90vw, 660px); } }
+@media (max-width: 480px) { .btn { padding: .6rem .75rem; border-radius: 12px; } .search-wrap { min-width: 0; flex: 1; } .search-wrap input[type="search"] { width: 110px; } .meta { flex-wrap: wrap; gap: .35rem; } .attachments { grid-template-columns: 1fr; } }
       .controls { flex-wrap: wrap; }
       .search-wrap input[type="search"] { width: 140px; }
     }
@@ -253,8 +115,8 @@
       <span class="pill" id="stats">No chat loaded</span>
     </div>
     <div class="controls">
-      <label class="btn" for="chatFile">Open Chat (.txt)</label>
-      <input id="chatFile" type="file" accept=".txt,.text" />
+      <label class="btn" for="chatFile">Open Chat (.txt or .zip)</label>
+      <input id="chatFile" type="file" accept=".txt,.text,.zip" />
       <label class="btn" for="attDir">Add Attachments Folder</label>
       <input id="attDir" type="file" webkitdirectory multiple />
       <select id="meSelect" class="select" title="Pick who is 'Me'">
@@ -273,8 +135,8 @@
 
   <div class="wrap">
     <div id="hints" class="hint">
-      Drop your exported <b>_chat.txt</b> anywhere on this page or use <b>Open Chat</b>. Optionally select the <b>attachments folder</b> so images/videos render.
-      <br/>This viewer works completely offline in your browser. No data leaves your device.
+      Drop your exported <b>_chat.txt</b> or a single <b>.zip</b> of the export anywhere on this page, or use <b>Open Chat</b>.
+      If you choose a .zip, attachments and the chat file will be loaded automatically — no third‑party libraries required. Works fully offline.
     </div>
     <div class="chat" id="chat"></div>
   </div>
@@ -284,7 +146,6 @@
     <button class="fab" id="toBottom" title="Scroll to bottom">↓</button>
   </div>
 
-  <!-- Optional embedded demo content (filled by our build step if available) -->
   <script id="seedChat" type="text/plain"></script>
 
   <script>
@@ -301,11 +162,10 @@
       const themeBtn = $('#themeBtn');
       const toTop = $('#toTop');
       const toBottom = $('#toBottom');
-      const topbar = $('#topbar');
 
       let messages = [];
       let participants = new Set();
-      let attachmentsMap = new Map(); // filename -> File
+      let attachmentsMap = new Map(); // filename -> File/Blob
       let me = '';
 
       // Theme
@@ -316,7 +176,6 @@
         localStorage.setItem('wa-theme', document.body.classList.contains('light') ? 'light' : 'dark');
       });
 
-      // Scroll helpers
       toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
       toBottom.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
 
@@ -324,25 +183,28 @@
       document.addEventListener('dragover', (e) => { e.preventDefault(); });
       document.addEventListener('drop', async (e) => {
         e.preventDefault();
-        const file = [...e.dataTransfer.files].find(f => f.name.toLowerCase().endsWith('.txt'));
-        if (file) loadChatFile(file);
+        const files = [...e.dataTransfer.files];
+        const zip = files.find(f => f.name.toLowerCase().endsWith('.zip'));
+        if (zip) return loadZip(zip);
+        const txt = files.find(f => /\.t(e)?xt$/i.test(f.name));
+        if (txt) await loadChatFile(txt);
         // Also include any non-txt files as potential attachments
-        for (const f of e.dataTransfer.files) {
-          if (!f.name.toLowerCase().endsWith('.txt')) attachmentsMap.set(f.name, f);
+        for (const f of files) {
+          if (!/\.t(e)?xt$/i.test(f.name)) attachmentsMap.set(f.name, f);
         }
+        render(messages);
       });
 
-      chatFile.addEventListener('change', () => {
+      chatFile.addEventListener('change', async () => {
         const file = chatFile.files[0];
-        if (file) loadChatFile(file);
+        if (!file) return;
+        if (file.name.toLowerCase().endsWith('.zip')) await loadZip(file);
+        else if (/\.t(e)?xt$/i.test(file.name)) await loadChatFile(file);
       });
 
       attDir.addEventListener('change', () => {
         attachmentsMap.clear();
-        for (const f of attDir.files) {
-          attachmentsMap.set(f.name, f);
-        }
-        // Re-render to hydrate attachments
+        for (const f of attDir.files) attachmentsMap.set(f.name, f);
         render(messages);
       });
 
@@ -353,84 +215,124 @@
       });
 
       searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim();
-        render(messages, q);
+        render(messages, searchInput.value.trim());
       });
 
-      // Parse the WhatsApp exported text
+      /** ---------------- ZIP READER (no third-party) ---------------- **/
+      // Minimal ZIP central directory parser supporting "store" (0) and "deflate" (8).
+      // Uses DecompressionStream('deflate-raw') where available.
+      class ZipReader {
+        constructor(arrayBuffer) {
+          this.bytes = new Uint8Array(arrayBuffer);
+          this.view = new DataView(arrayBuffer);
+          this.files = new Map(); // name -> {offset, compSize, uncompSize, method}
+        }
+        static async fromFile(file) { return new ZipReader(await file.arrayBuffer()); }
+
+        findEOCD() {
+          const sig = 0x06054b50;
+          // EOCD is at the end; search last 64KB per spec
+          const maxBack = Math.min(this.bytes.length, 0xFFFF + 22);
+          for (let i = this.bytes.length - 22; i >= this.bytes.length - maxBack; i--) {
+            if (i < 0) break;
+            if (this.view.getUint32(i, true) === sig) return i;
+          }
+          throw new Error('ZIP: End of Central Directory not found');
+        }
+
+        parseCentralDirectory() {
+          const eocd = this.findEOCD();
+          const cdSize = this.view.getUint32(eocd + 12, true);
+          const cdOffset = this.view.getUint32(eocd + 16, true);
+          let ptr = cdOffset;
+          while (ptr < cdOffset + cdSize) {
+            const sig = this.view.getUint32(ptr, true);
+            if (sig !== 0x02014b50) break; // central dir file header
+            const compMethod = this.view.getUint16(ptr + 10, true);
+            const compSize = this.view.getUint32(ptr + 20, true);
+            const uncompSize = this.view.getUint32(ptr + 24, true);
+            const fnameLen = this.view.getUint16(ptr + 28, true);
+            const extraLen = this.view.getUint16(ptr + 30, true);
+            const commentLen = this.view.getUint16(ptr + 32, true);
+            const localHeaderOffset = this.view.getUint32(ptr + 42, true);
+            const nameBytes = this.bytes.subarray(ptr + 46, ptr + 46 + fnameLen);
+            const name = new TextDecoder('utf-8').decode(nameBytes);
+            this.files.set(name, { method: compMethod, compSize, uncompSize, localHeaderOffset });
+            ptr += 46 + fnameLen + extraLen + commentLen;
+          }
+        }
+
+        async getFile(name) {
+          const entry = this.files.get(name);
+          if (!entry) return null;
+          const { localHeaderOffset, method, compSize } = entry;
+          // Local header
+          let ptr = localHeaderOffset;
+          if (this.view.getUint32(ptr, true) !== 0x04034b50) throw new Error('ZIP: Bad local header');
+          const fnameLen = this.view.getUint16(ptr + 26, true);
+          const extraLen = this.view.getUint16(ptr + 28, true);
+          const dataStart = ptr + 30 + fnameLen + extraLen;
+          const compData = this.bytes.subarray(dataStart, dataStart + compSize);
+
+          if (method === 0) { // stored
+            return new Blob([compData]);
+          } else if (method === 8) { // deflate (raw)
+            if ('DecompressionStream' in window) {
+              const ds = new DecompressionStream('deflate-raw');
+              const res = new Response(new Blob([compData]).stream().pipeThrough(ds));
+              return await res.blob();
+            } else {
+              throw new Error('Deflate decompression not supported in this browser');
+            }
+          } else {
+            throw new Error('Unsupported compression method: ' + method);
+          }
+        }
+      }
+
+      /** ---------------- Chat parsing & rendering ---------------- **/
       function parse(text) {
         const lines = text.split(/\r?\n/);
         const re = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?)\s*(AM|PM)?\]\s(.*?):\s([\s\S]*)$/;
         const msgs = [];
         let cur = null;
-
-        const pushCur = () => {
-          if (!cur) return;
-          // Trim trailing newline
-          cur.text = cur.text.replace(/\s+$/,'');
-          msgs.push(cur);
-          cur = null;
-        };
-
+        const pushCur = () => { if (!cur) return; cur.text = cur.text.replace(/\s+$/, ''); msgs.push(cur); cur = null; };
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           const m = line.match(re);
           if (m) {
-            // New message
             pushCur();
             const [_, d, t, ampm, sender, body] = m;
             const dateStr = d + ' ' + t + (ampm ? ' ' + ampm : '');
             const dt = new Date(dateStr);
-            cur = {
-              date: dt,
-              dateKey: dt.toLocaleDateString(),
-              time: dt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}),
-              sender,
-              text: '',
-              edited: false,
-              attachments: [],
-              system: false
-            };
-            // Body may continue on next lines if not starting with a timestamp
+            cur = { date: dt, dateKey: dt.toLocaleDateString(), time: dt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}), sender, text: '', edited: false, attachments: [], system: false };
             appendBody(cur, body);
           } else {
-            // Continuation of previous message
-            if (!cur) continue;
-            appendBody(cur, line);
+            if (!cur) continue; appendBody(cur, line);
           }
         }
         pushCur();
-
-        // Participants
         const who = new Set();
-        for (const msg of msgs) {
-          if (!msg.system && msg.sender) who.add(msg.sender);
-        }
+        for (const msg of msgs) { if (!msg.system && msg.sender) who.add(msg.sender); }
         participants = who;
         return msgs;
       }
 
       function appendBody(cur, chunk) {
-        // Detect inline flags like <This message was edited>
         const editedFlag = /<\s*This message was edited\s*>/i;
         if (editedFlag.test(chunk)) cur.edited = true;
-        // Detect attachments: <attached: filename>
         const attRe = /<\s*attached:\s*([^>]+)\s*>/ig;
-        let match;
-        let remaining = chunk;
-        // Extract attachments, but keep the rest of text
+        let match; let remaining = chunk;
         while ((match = attRe.exec(chunk)) !== null) {
           const fname = match[1].trim();
           if (!cur.attachments.includes(fname)) cur.attachments.push(fname);
           remaining = remaining.replace(match[0], '').trim();
         }
-        // Remove any stray control characters (like LRM)
         remaining = remaining.replace(/\u200e|\u200f|\u202a|\u202c/g, '');
         cur.text += (cur.text ? '\n' : '') + remaining;
-        cur.system = !cur.sender; // fallback (rarely used here)
+        cur.system = !cur.sender;
       }
 
-      // Linkify URLs
       function linkify(text) {
         const urlRe = /((https?:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi;
         return text.replace(urlRe, (u) => {
@@ -439,7 +341,32 @@
         });
       }
 
-      // Render messages
+      function highlight(html, q) {
+        const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return html.replace(new RegExp(escQ, 'ig'), (m) => '<span class="highlight">' + m + '</span>');
+      }
+
+      function escapeHtml(str) { return (str || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+      function initials(name) {
+        if (!name) return '•';
+        const clean = name.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+        const parts = clean.split(/\s+/);
+        return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+      }
+
+      function mimeFromName(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        const map = {
+          jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif',
+          heic:'image/heic', heif:'image/heif', avif:'image/avif',
+          mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime', m4v:'video/x-m4v', mkv:'video/x-matroska', '3gp':'video/3gpp',
+          opus:'audio/opus', ogg:'audio/ogg', mp3:'audio/mpeg', aac:'audio/aac', wav:'audio/wav',
+          txt:'text/plain'
+        };
+        return map[ext] || 'application/octet-stream';
+      }
+
+      // Core renderer
       function render(msgs, query='') {
         chatEl.innerHTML = '';
         if (!msgs || !msgs.length) {
@@ -447,8 +374,6 @@
           meSelect.innerHTML = '<option value="">Pick “Me”</option>';
           return;
         }
-
-        // Participants dropdown
         const names = [...participants].sort((a,b)=>a.localeCompare(b));
         const savedMe = localStorage.getItem('wa-me');
         if (!me && savedMe && names.includes(savedMe)) me = savedMe;
@@ -457,14 +382,9 @@
         ).join('');
         meSelect.innerHTML = options;
 
-        // Search
         const q = query.toLowerCase();
-        let count = 0;
-        let lastDateKey = null;
-
+        let count = 0; let lastDateKey = null;
         const frag = document.createDocumentFragment();
-
-        // Filter by search if needed
         const filtered = q ? msgs.filter(m => (m.text && m.text.toLowerCase().includes(q)) || (m.sender && m.sender.toLowerCase().includes(q))) : msgs;
 
         for (const m of filtered) {
@@ -475,49 +395,27 @@
             chip.textContent = new Date(m.date).toLocaleDateString([], {year:'numeric', month:'long', day:'numeric'});
             frag.appendChild(chip);
           }
-
           const row = document.createElement('div');
           row.className = 'row' + (me && m.sender === me ? ' mine' : '');
+          const avatar = document.createElement('div'); avatar.className = 'avatar'; avatar.textContent = initials(m.sender || ''); row.appendChild(avatar);
+          const bubble = document.createElement('div'); bubble.className = 'bubble' + (m.system ? ' system' : '');
 
-          const avatar = document.createElement('div');
-          avatar.className = 'avatar';
-          avatar.textContent = initials(m.sender || '');
-          row.appendChild(avatar);
-
-          const bubble = document.createElement('div');
-          bubble.className = 'bubble' + (m.system ? ' system' : '');
-
-          // meta
-          const meta = document.createElement('div');
-          meta.className = 'meta';
-          const sender = document.createElement('div');
-          sender.className = 'sender';
-          sender.textContent = m.sender || 'System';
-          const time = document.createElement('div');
-          time.className = 'time';
-          time.textContent = m.time;
+          const meta = document.createElement('div'); meta.className = 'meta';
+          const sender = document.createElement('div'); sender.className = 'sender'; sender.textContent = m.sender || 'System';
+          const time = document.createElement('div'); time.className = 'time'; time.textContent = m.time;
           meta.appendChild(sender);
-          if (m.edited) {
-            const ed = document.createElement('span');
-            ed.className = 'edited';
-            ed.textContent = 'edited';
-            meta.appendChild(ed);
-          }
+          if (m.edited) { const ed = document.createElement('span'); ed.className = 'edited'; ed.textContent = 'edited'; meta.appendChild(ed); }
           meta.appendChild(time);
           bubble.appendChild(meta);
 
-          // content
           if (m.text) {
-            const content = document.createElement('div');
-            content.className = 'content';
-            const safe = escapeHtml(m.text);
-            const linked = linkify(safe);
+            const content = document.createElement('div'); content.className = 'content';
+            const safe = escapeHtml(m.text); const linked = linkify(safe);
             content.innerHTML = q ? highlight(linked, q) : linked;
             bubble.appendChild(content);
             if (q && (m.text.toLowerCase().includes(q) || (m.sender && m.sender.toLowerCase().includes(q)))) count++;
           }
 
-          // attachments
           if (m.attachments && m.attachments.length) {
             const grid = document.createElement('div');
             grid.className = 'attachments';
@@ -525,32 +423,70 @@
               const att = document.createElement('div');
               att.className = 'att';
               const lower = fname.toLowerCase();
-              const fileObj = attachmentsMap.get(fname) || attachmentsMap.get(decodeURIComponent(fname)) || attachmentsMap.get(fname.split('/').pop());
+              const base = fname.split('/').pop();
+              const fileObj = attachmentsMap.get(base) || attachmentsMap.get(decodeURIComponent(base));
               if (fileObj) {
+                const type = fileObj.type || mimeFromName(base);
                 const url = URL.createObjectURL(fileObj);
-                if (/\.(jpg|jpeg|png|webp|gif)$/i.test(lower)) {
+
+                const ext = base.split('.').pop().toLowerCase();
+                const isImg = /^(jpg|jpeg|png|webp|gif|avif)$/i.test(ext);
+                const isVid = /^(mp4|webm|mov|m4v|mkv|3gp)$/i.test(ext);
+                const isAud = /^(opus|ogg|mp3|aac|wav)$/i.test(ext);
+
+                if (isImg) {
                   const img = document.createElement('img');
                   img.loading = 'lazy';
-                  img.src = url;
-                  img.alt = fname;
+                  img.src = url; img.alt = base;
+                  img.addEventListener('error', () => {
+                    // HEIC/HEIF are not widely supported without codecs
+                    if (/\.(heic|heif)$/i.test(lower)) {
+                      const miss = document.createElement('div');
+                      miss.className = 'missing';
+                      miss.textContent = base + ' (HEIC preview not supported by this browser)';
+                      att.innerHTML = ''; att.appendChild(miss);
+                    }
+                  });
                   att.appendChild(img);
-                } else if (/\.(mp4|webm|mov|m4v)$/i.test(lower)) {
+                } else if (isVid) {
                   const vid = document.createElement('video');
                   vid.controls = true;
                   vid.preload = 'metadata';
-                  vid.src = url;
+                  vid.playsInline = true;
+                  vid.style.maxHeight = '460px';
+                  const source = document.createElement('source');
+                  source.src = url; source.type = type || 'video/mp4';
+                  vid.appendChild(source);
+                  // try to set poster using a sibling image with same basename
+                  const stem = base.replace(/\.[^.]+$/, '');
+                  const posterName = ['jpg','jpeg','png','webp','avif'].map(e => `${stem}.${e}`).find(n => attachmentsMap.has(n));
+                  if (posterName) {
+                    const pblob = attachmentsMap.get(posterName);
+                    const purl = URL.createObjectURL(pblob);
+                    vid.setAttribute('poster', purl);
+                  }
                   att.appendChild(vid);
+                } else if (isAud) {
+                  const aud = document.createElement('audio');
+                  aud.controls = true;
+                  aud.preload = 'metadata';
+                  const source = document.createElement('source');
+                  source.src = url; source.type = type || 'audio/ogg';
+                  aud.appendChild(source);
+                  att.appendChild(aud);
                 } else {
                   const a = document.createElement('a');
-                  a.href = url; a.download = fname; a.textContent = fname;
-                  a.style.display = 'block';
-                  a.style.padding = '.7rem';
+                  a.href = url; a.download = base; a.textContent = base; a.style.display = 'block'; a.style.padding = '.7rem';
                   att.appendChild(a);
                 }
+
+                // Revoke URL when element is removed to free memory
+                const revoke = () => URL.revokeObjectURL(url);
+                att.addEventListener('remove', revoke);
               } else {
                 const miss = document.createElement('div');
                 miss.className = 'missing';
-                miss.textContent = fname + ' (not found in attachments)';
+                miss.textContent = base + ' (not found in attachments)';
                 att.appendChild(miss);
               }
               grid.appendChild(att);
@@ -558,60 +494,72 @@
             bubble.appendChild(grid);
           }
 
-          row.appendChild(bubble);
-          frag.appendChild(row);
+          row.appendChild(bubble); frag.appendChild(row);
         }
-
-        chatEl.innerHTML = '';
-        chatEl.appendChild(frag);
-
-        stats.textContent = filtered.length + ' messages • ' + names.length + ' participants';
-        if (q) searchCount.textContent = count + ' matches'; else searchCount.textContent = '';
-
-        // Hide hint once rendered
+        chatEl.innerHTML = ''; chatEl.appendChild(frag);
+        stats.textContent = filtered.length + ' messages • ' + [...participants].length + ' participants';
+        searchCount.textContent = q ? (count + ' matches') : '';
         hints.style.display = 'none';
-      }
-
-      function highlight(html, q) {
-        // q is already lowercased
-        const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return html.replace(new RegExp(escQ, 'ig'), (m) => '<span class="highlight">'+m+'</span>');
-      }
-
-      function escapeHtml(str) {
-        return (str || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      }
-      function initials(name) {
-        if (!name) return '•';
-        const clean = name.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
-        const parts = clean.split(/\s+/);
-        return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
       }
 
       async function loadChatFile(file) {
         const text = await file.text();
         messages = parse(text);
-        // Pick a default "me" heuristically: look for "You" or a name with heart emoji
         const names = [...participants];
         me = names.find(n => /(^You$)|(\u2764|\u2665|\ud83d\udc9e|\ud83d\udc95|\ud83d\udc9b|\ud83d\udc9a|\ud83d\udc99|\ud83d\udc9c)/.test(n)) || localStorage.getItem('wa-me') || '';
         render(messages);
-        // Scroll to bottom on load
         requestAnimationFrame(() => window.scrollTo(0, document.body.scrollHeight));
       }
 
-      // If we have embedded demo content, parse it on first load
+      // Load a ZIP export and hydrate attachments + chat automatically
+      async function loadZip(file) {
+        try {
+          const zr = await ZipReader.fromFile(file);
+          zr.parseCentralDirectory();
+          // Heuristics: choose first .txt as chat file; gather all other media files
+          const names = [...zr.files.keys()];
+          const chatName = names.find(n => /(^|\/)_(chat|Chat)\.t(e)?xt$/i.test(n)) || names.find(n => /\.t(e)?xt$/i.test(n));
+          if (!chatName) throw new Error('No .txt chat file found inside ZIP');
+
+          // Extract chat text
+          const chatBlob = await zr.getFile(chatName);
+          const chatText = await chatBlob.text();
+          attachmentsMap.clear();
+
+          // Extract media entries (ignore directories and the chat txt)
+          for (const n of names) {
+            if (n === chatName) continue;
+            if (n.endsWith('/')) continue;
+            const lower = n.toLowerCase();
+            if (!/\.(jpg|jpeg|png|webp|gif|mp4|webm|mov|m4v|heic|heif|pdf|opus|mp3|aac|wav)$/i.test(lower)) continue; // common WA export types
+            try {
+              const blob = await zr.getFile(n);
+              const typed = blob.type ? blob : new Blob([blob], { type: mimeFromName(n) });
+              // Keep only the basename for lookup since WA references are usually basenames
+              const base = n.split('/').pop();
+              attachmentsMap.set(base, typed);
+            } catch (err) {
+              console.warn('Failed to extract', n, err);
+            }
+          }
+
+          await loadChatFile(new File([chatText], chatName.split('/').pop(), { type: 'text/plain' }));
+        } catch (err) {
+          console.error(err);
+          stats.textContent = 'ZIP load error: ' + err.message;
+        }
+      }
+
+      // If seed content exists, show it
       const seed = document.getElementById('seedChat').textContent.trim();
       if (seed) {
         messages = parse(seed);
         me = [...participants].find(n => /(^You$)|(\u2764|\u2665|\ud83d\udc9e|\ud83d\udc95|\ud83d\udc9b|\ud83d\udc9a|\ud83d\udc99|\ud83d\udc9c)/.test(n)) || '';
         render(messages);
-        // Preload a tip
-        const tip = document.createElement('div');
-        tip.className = 'hint';
-        tip.textContent = 'Demo loaded. For full media, click “Add Attachments Folder” and select the folder containing the exported media files.';
+        const tip = document.createElement('div'); tip.className = 'hint';
+        tip.textContent = 'Demo loaded. Drop a .zip export to auto-hydrate messages and media.';
         chatEl.parentElement.insertBefore(tip, chatEl);
       }
-
     })();
   </script>
 </body>
