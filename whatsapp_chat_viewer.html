@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WhatsApp Chat Viewer — Local</title>
+  <style>
+    :root {
+      --bg: #0b141a;
+      --panel: #111b21;
+      --panel-2: #202c33;
+      --text: #e9edef;
+      --muted: #8696a0;
+      --me: #005c4b;
+      --me-2: #075e54;
+      --them: #1f2c34;
+      --accent: #02a884;
+      --bubble-radius: 16px;
+      --shadow: 0 6px 16px rgba(0,0,0,.2);
+      --datechip: #1d282f;
+      --search: #0e3a2f;
+    }
+    .light {
+      --bg: #efeae2;
+      --panel: #f0f2f5;
+      --panel-2: #ffffff;
+      --text: #111b21;
+      --muted: #54656f;
+      --me: #d9fdd3;
+      --me-2: #bdf3b2;
+      --them: #ffffff;
+      --accent: #128c7e;
+      --datechip: #e2e8f0;
+      --search: #e6fffa;
+      color-scheme: light;
+    }
+
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font: 15px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Top bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto;
+      gap: .5rem;
+      align-items: center;
+      background: var(--panel);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: .5rem .75rem;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .brand .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(2,168,132,.2);
+    }
+
+    .controls {
+      display: flex; gap: .5rem; align-items: center;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.1);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: .5rem .7rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+
+    .pill {
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,.08);
+      padding: .3rem .5rem;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search-wrap {
+      display: flex; gap: .5rem; align-items: center;
+      padding: .35rem .5rem;
+      border-radius: 10px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,.08);
+      min-width: 200px;
+    }
+    .search-wrap input[type="search"] {
+      background: transparent; border: 0; outline: 0; color: var(--text);
+      width: 220px;
+    }
+    .search-count { font-size: 12px; color: var(--muted); }
+
+    .select {
+      background: var(--panel-2); border: 1px solid rgba(255,255,255,.08);
+      color: var(--text);
+      border-radius: 10px; padding: .45rem .5rem;
+    }
+
+    /* Content area */
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: .5rem;
+    }
+    .chat {
+      display: flex; flex-direction: column; gap: .35rem;
+      padding: .75rem .5rem 4rem;
+    }
+
+    .date-chip {
+      align-self: center;
+      background: var(--datechip);
+      padding: .35rem .75rem;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+      margin: .5rem 0;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .row {
+      display: flex;
+      gap: .5rem; align-items: flex-end;
+    }
+
+    .row.mine { justify-content: flex-end; }
+    .row .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2a3942; color: #cfd6da;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex: 0 0 28px;
+      user-select: none;
+    }
+    .row.mine .avatar { display: none; }
+
+    .bubble {
+      max-width: min(80%, 660px);
+      background: var(--them);
+      border-radius: 12px var(--bubble-radius) var(--bubble-radius) 12px;
+      padding: .55rem .65rem .35rem .65rem;
+      position: relative;
+      box-shadow: var(--shadow);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .row.mine .bubble {
+      background: var(--me);
+      border-radius: var(--bubble-radius) 12px 12px var(--bubble-radius);
+    }
+
+    .meta {
+      display: flex; gap: .5rem; align-items: baseline; margin-bottom: .2rem;
+      color: var(--muted); font-size: 12px; font-weight: 600;
+    }
+    .sender { color: var(--muted); }
+    .time { margin-left: auto; font-variant-numeric: tabular-nums; }
+    .edited {
+      display: inline-block; margin-left: .35rem; font-size: 11px; color: var(--muted);
+      background: rgba(255,255,255,.06);
+      padding: 2px 6px; border-radius: 999px;
+    }
+
+    .system {
+      align-self: center;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      font-size: 13px;
+    }
+
+    .content a { color: var(--accent); text-decoration: none; }
+    .content a:hover { text-decoration: underline; }
+
+    .attachments {
+      display: grid; gap: .35rem; margin-top: .35rem;
+    }
+    .att {
+      overflow: hidden; border-radius: 10px; border: 1px solid rgba(255,255,255,.08);
+      background: #0b0f12;
+    }
+    .att img, .att video {
+      display: block; width: 100%;
+      height: auto; max-height: 360px; object-fit: cover;
+    }
+    .att .missing {
+      padding: .7rem;
+      color: var(--muted);
+      background: rgba(0,0,0,.2);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      position: fixed; right: 12px; bottom: 12px; z-index: 60;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .fab {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--accent); border: 0; color: white;
+      font-weight: 900; cursor: pointer; box-shadow: var(--shadow);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      padding: .5rem 1rem;
+      background: rgba(255,255,255,.04);
+      border: 1px dashed rgba(255,255,255,.1);
+      border-radius: 10px;
+      margin-top: .5rem;
+    }
+
+    .highlight { background: rgba(2,168,132,.25); padding: 0 2px; border-radius: 2px; }
+
+    @media (max-width: 700px) {
+      .topbar { grid-template-columns: 1fr auto auto; grid-auto-rows: auto; grid-auto-flow: row; }
+      .controls { flex-wrap: wrap; }
+      .search-wrap input[type="search"] { width: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar" id="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>WhatsApp Chat Viewer</span>
+      <span class="pill" id="stats">No chat loaded</span>
+    </div>
+    <div class="controls">
+      <label class="btn" for="chatFile">Open Chat (.txt)</label>
+      <input id="chatFile" type="file" accept=".txt,.text" />
+      <label class="btn" for="attDir">Add Attachments Folder</label>
+      <input id="attDir" type="file" webkitdirectory multiple />
+      <select id="meSelect" class="select" title="Pick who is 'Me'">
+        <option value="">Pick “Me”</option>
+      </select>
+      <button class="btn" id="themeBtn" title="Toggle theme">Toggle Theme</button>
+    </div>
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input id="search" type="search" placeholder="Search messages…" />
+      <span class="search-count" id="searchCount"></span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="hints" class="hint">
+      Drop your exported <b>_chat.txt</b> anywhere on this page or use <b>Open Chat</b>. Optionally select the <b>attachments folder</b> so images/videos render.
+      <br/>This viewer works completely offline in your browser. No data leaves your device.
+    </div>
+    <div class="chat" id="chat"></div>
+  </div>
+
+  <div class="toolbar">
+    <button class="fab" id="toTop" title="Scroll to top">↑</button>
+    <button class="fab" id="toBottom" title="Scroll to bottom">↓</button>
+  </div>
+
+  <!-- Optional embedded demo content (filled by our build step if available) -->
+  <script id="seedChat" type="text/plain"></script>
+
+  <script>
+    (function() {
+      const $ = (sel) => document.querySelector(sel);
+      const chatEl = $('#chat');
+      const chatFile = $('#chatFile');
+      const attDir = $('#attDir');
+      const stats = $('#stats');
+      const meSelect = $('#meSelect');
+      const searchInput = $('#search');
+      const searchCount = $('#searchCount');
+      const hints = $('#hints');
+      const themeBtn = $('#themeBtn');
+      const toTop = $('#toTop');
+      const toBottom = $('#toBottom');
+      const topbar = $('#topbar');
+
+      let messages = [];
+      let participants = new Set();
+      let attachmentsMap = new Map(); // filename -> File
+      let me = '';
+
+      // Theme
+      const savedTheme = localStorage.getItem('wa-theme') || 'dark';
+      if (savedTheme === 'light') document.body.classList.add('light');
+      themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light');
+        localStorage.setItem('wa-theme', document.body.classList.contains('light') ? 'light' : 'dark');
+      });
+
+      // Scroll helpers
+      toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      toBottom.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
+
+      // Drag & drop
+      document.addEventListener('dragover', (e) => { e.preventDefault(); });
+      document.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const file = [...e.dataTransfer.files].find(f => f.name.toLowerCase().endsWith('.txt'));
+        if (file) loadChatFile(file);
+        // Also include any non-txt files as potential attachments
+        for (const f of e.dataTransfer.files) {
+          if (!f.name.toLowerCase().endsWith('.txt')) attachmentsMap.set(f.name, f);
+        }
+      });
+
+      chatFile.addEventListener('change', () => {
+        const file = chatFile.files[0];
+        if (file) loadChatFile(file);
+      });
+
+      attDir.addEventListener('change', () => {
+        attachmentsMap.clear();
+        for (const f of attDir.files) {
+          attachmentsMap.set(f.name, f);
+        }
+        // Re-render to hydrate attachments
+        render(messages);
+      });
+
+      meSelect.addEventListener('change', () => {
+        me = meSelect.value || '';
+        render(messages, searchInput.value.trim());
+        localStorage.setItem('wa-me', me);
+      });
+
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim();
+        render(messages, q);
+      });
+
+      // Parse the WhatsApp exported text
+      function parse(text) {
+        const lines = text.split(/\r?\n/);
+        const re = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?)\s*(AM|PM)?\]\s(.*?):\s([\s\S]*)$/;
+        const msgs = [];
+        let cur = null;
+
+        const pushCur = () => {
+          if (!cur) return;
+          // Trim trailing newline
+          cur.text = cur.text.replace(/\s+$/,'');
+          msgs.push(cur);
+          cur = null;
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const m = line.match(re);
+          if (m) {
+            // New message
+            pushCur();
+            const [_, d, t, ampm, sender, body] = m;
+            const dateStr = d + ' ' + t + (ampm ? ' ' + ampm : '');
+            const dt = new Date(dateStr);
+            cur = {
+              date: dt,
+              dateKey: dt.toLocaleDateString(),
+              time: dt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}),
+              sender,
+              text: '',
+              edited: false,
+              attachments: [],
+              system: false
+            };
+            // Body may continue on next lines if not starting with a timestamp
+            appendBody(cur, body);
+          } else {
+            // Continuation of previous message
+            if (!cur) continue;
+            appendBody(cur, line);
+          }
+        }
+        pushCur();
+
+        // Participants
+        const who = new Set();
+        for (const msg of msgs) {
+          if (!msg.system && msg.sender) who.add(msg.sender);
+        }
+        participants = who;
+        return msgs;
+      }
+
+      function appendBody(cur, chunk) {
+        // Detect inline flags like <This message was edited>
+        const editedFlag = /<\s*This message was edited\s*>/i;
+        if (editedFlag.test(chunk)) cur.edited = true;
+        // Detect attachments: <attached: filename>
+        const attRe = /<\s*attached:\s*([^>]+)\s*>/ig;
+        let match;
+        let remaining = chunk;
+        // Extract attachments, but keep the rest of text
+        while ((match = attRe.exec(chunk)) !== null) {
+          const fname = match[1].trim();
+          if (!cur.attachments.includes(fname)) cur.attachments.push(fname);
+          remaining = remaining.replace(match[0], '').trim();
+        }
+        // Remove any stray control characters (like LRM)
+        remaining = remaining.replace(/\u200e|\u200f|\u202a|\u202c/g, '');
+        cur.text += (cur.text ? '\n' : '') + remaining;
+        cur.system = !cur.sender; // fallback (rarely used here)
+      }
+
+      // Linkify URLs
+      function linkify(text) {
+        const urlRe = /((https?:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi;
+        return text.replace(urlRe, (u) => {
+          const url = u.startsWith('http') ? u : 'https://' + u;
+          return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + u + '</a>';
+        });
+      }
+
+      // Render messages
+      function render(msgs, query='') {
+        chatEl.innerHTML = '';
+        if (!msgs || !msgs.length) {
+          stats.textContent = 'No chat loaded';
+          meSelect.innerHTML = '<option value="">Pick “Me”</option>';
+          return;
+        }
+
+        // Participants dropdown
+        const names = [...participants].sort((a,b)=>a.localeCompare(b));
+        const savedMe = localStorage.getItem('wa-me');
+        if (!me && savedMe && names.includes(savedMe)) me = savedMe;
+        const options = ['<option value="">Pick “Me”</option>'].concat(
+          names.map(n => '<option '+(n===me?'selected':'')+' value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>')
+        ).join('');
+        meSelect.innerHTML = options;
+
+        // Search
+        const q = query.toLowerCase();
+        let count = 0;
+        let lastDateKey = null;
+
+        const frag = document.createDocumentFragment();
+
+        // Filter by search if needed
+        const filtered = q ? msgs.filter(m => (m.text && m.text.toLowerCase().includes(q)) || (m.sender && m.sender.toLowerCase().includes(q))) : msgs;
+
+        for (const m of filtered) {
+          if (m.dateKey !== lastDateKey) {
+            lastDateKey = m.dateKey;
+            const chip = document.createElement('div');
+            chip.className = 'date-chip';
+            chip.textContent = new Date(m.date).toLocaleDateString([], {year:'numeric', month:'long', day:'numeric'});
+            frag.appendChild(chip);
+          }
+
+          const row = document.createElement('div');
+          row.className = 'row' + (me && m.sender === me ? ' mine' : '');
+
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar';
+          avatar.textContent = initials(m.sender || '');
+          row.appendChild(avatar);
+
+          const bubble = document.createElement('div');
+          bubble.className = 'bubble' + (m.system ? ' system' : '');
+
+          // meta
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          const sender = document.createElement('div');
+          sender.className = 'sender';
+          sender.textContent = m.sender || 'System';
+          const time = document.createElement('div');
+          time.className = 'time';
+          time.textContent = m.time;
+          meta.appendChild(sender);
+          if (m.edited) {
+            const ed = document.createElement('span');
+            ed.className = 'edited';
+            ed.textContent = 'edited';
+            meta.appendChild(ed);
+          }
+          meta.appendChild(time);
+          bubble.appendChild(meta);
+
+          // content
+          if (m.text) {
+            const content = document.createElement('div');
+            content.className = 'content';
+            const safe = escapeHtml(m.text);
+            const linked = linkify(safe);
+            content.innerHTML = q ? highlight(linked, q) : linked;
+            bubble.appendChild(content);
+            if (q && (m.text.toLowerCase().includes(q) || (m.sender && m.sender.toLowerCase().includes(q)))) count++;
+          }
+
+          // attachments
+          if (m.attachments && m.attachments.length) {
+            const grid = document.createElement('div');
+            grid.className = 'attachments';
+            for (const fname of m.attachments) {
+              const att = document.createElement('div');
+              att.className = 'att';
+              const lower = fname.toLowerCase();
+              const fileObj = attachmentsMap.get(fname) || attachmentsMap.get(decodeURIComponent(fname)) || attachmentsMap.get(fname.split('/').pop());
+              if (fileObj) {
+                const url = URL.createObjectURL(fileObj);
+                if (/\.(jpg|jpeg|png|webp|gif)$/i.test(lower)) {
+                  const img = document.createElement('img');
+                  img.loading = 'lazy';
+                  img.src = url;
+                  img.alt = fname;
+                  att.appendChild(img);
+                } else if (/\.(mp4|webm|mov|m4v)$/i.test(lower)) {
+                  const vid = document.createElement('video');
+                  vid.controls = true;
+                  vid.preload = 'metadata';
+                  vid.src = url;
+                  att.appendChild(vid);
+                } else {
+                  const a = document.createElement('a');
+                  a.href = url; a.download = fname; a.textContent = fname;
+                  a.style.display = 'block';
+                  a.style.padding = '.7rem';
+                  att.appendChild(a);
+                }
+              } else {
+                const miss = document.createElement('div');
+                miss.className = 'missing';
+                miss.textContent = fname + ' (not found in attachments)';
+                att.appendChild(miss);
+              }
+              grid.appendChild(att);
+            }
+            bubble.appendChild(grid);
+          }
+
+          row.appendChild(bubble);
+          frag.appendChild(row);
+        }
+
+        chatEl.innerHTML = '';
+        chatEl.appendChild(frag);
+
+        stats.textContent = filtered.length + ' messages • ' + names.length + ' participants';
+        if (q) searchCount.textContent = count + ' matches'; else searchCount.textContent = '';
+
+        // Hide hint once rendered
+        hints.style.display = 'none';
+      }
+
+      function highlight(html, q) {
+        // q is already lowercased
+        const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return html.replace(new RegExp(escQ, 'ig'), (m) => '<span class="highlight">'+m+'</span>');
+      }
+
+      function escapeHtml(str) {
+        return (str || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+      function initials(name) {
+        if (!name) return '•';
+        const clean = name.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+        const parts = clean.split(/\s+/);
+        return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+      }
+
+      async function loadChatFile(file) {
+        const text = await file.text();
+        messages = parse(text);
+        // Pick a default "me" heuristically: look for "You" or a name with heart emoji
+        const names = [...participants];
+        me = names.find(n => /(^You$)|(\u2764|\u2665|\ud83d\udc9e|\ud83d\udc95|\ud83d\udc9b|\ud83d\udc9a|\ud83d\udc99|\ud83d\udc9c)/.test(n)) || localStorage.getItem('wa-me') || '';
+        render(messages);
+        // Scroll to bottom on load
+        requestAnimationFrame(() => window.scrollTo(0, document.body.scrollHeight));
+      }
+
+      // If we have embedded demo content, parse it on first load
+      const seed = document.getElementById('seedChat').textContent.trim();
+      if (seed) {
+        messages = parse(seed);
+        me = [...participants].find(n => /(^You$)|(\u2764|\u2665|\ud83d\udc9e|\ud83d\udc95|\ud83d\udc9b|\ud83d\udc9a|\ud83d\udc99|\ud83d\udc9c)/.test(n)) || '';
+        render(messages);
+        // Preload a tip
+        const tip = document.createElement('div');
+        tip.className = 'hint';
+        tip.textContent = 'Demo loaded. For full media, click “Add Attachments Folder” and select the folder containing the exported media files.';
+        chatEl.parentElement.insertBefore(tip, chatEl);
+      }
+
+    })();
+  </script>
+</body>
+</html>
